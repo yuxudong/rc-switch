@@ -66,6 +66,13 @@
 // should be set to the minimum value of pulselength * the sync signal
 #define RCSWITCH_SEPARATION_LIMIT 4100
 
+// Durations shorter than this value are treated as receiver glitches and
+// merged into the preceding timing. Keep this below the shortest valid pulse
+// of every enabled protocol. The Avent doorbell uses pulses around 50-70 us.
+#ifndef RCSWITCH_MIN_PULSE_LENGTH
+#define RCSWITCH_MIN_PULSE_LENGTH 30
+#endif
+
 class RCSwitch {
 
   public:
@@ -178,6 +185,7 @@ class RCSwitch {
 
     #if not defined( RCSwitchDisableReceiving )
     static int nReceiveTolerance;
+    static const unsigned int nMinPulseLength;
     volatile static unsigned long long nReceivedValue;
     volatile static unsigned int nReceivedBitlength;
     volatile static unsigned int nReceivedDelay;
