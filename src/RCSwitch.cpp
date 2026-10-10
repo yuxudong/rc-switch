@@ -164,6 +164,7 @@ volatile unsigned int RCSwitch::nReceivedBitlength = 0;
 volatile unsigned int RCSwitch::nReceivedDelay = 0;
 volatile unsigned int RCSwitch::nReceivedProtocol = 0;
 int RCSwitch::nReceiveTolerance = 60;
+const unsigned int VAR_ISR_ATTR RCSwitch::nMinPulseLength = RCSWITCH_MIN_PULSE_LENGTH;
 const unsigned int VAR_ISR_ATTR RCSwitch::nSeparationLimit = RCSWITCH_SEPARATION_LIMIT;
 unsigned int RCSwitch::timings[RCSWITCH_MAX_CHANGES];
 unsigned int RCSwitch::buftimings[4];
@@ -891,9 +892,10 @@ void RECEIVE_ATTR RCSwitch::handleInterrupt() {
     repeatCount = 0;
   }
 
-  // заносим в массив длительность очередного принятого импульса
-  if (changeCount > 0 && duration < 100) { // игнорируем шумовые всплески менее 100 мкс
-    RCSwitch::timings[changeCount-1] += duration;   
+  // Store the next pulse duration. Very short receiver glitches are merged
+  // into the previous timing, but valid short protocol pulses must be kept.
+  if (changeCount > 0 && duration < RCSwitch::nMinPulseLength) {
+    RCSwitch::timings[changeCount-1] += duration;
   } else {
     RCSwitch::timings[changeCount++] = duration;
   }

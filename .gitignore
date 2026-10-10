@@ -15,3 +15,5 @@
 *.la
 *.a
 
+# PlatformIO build artifacts
+.pio/
